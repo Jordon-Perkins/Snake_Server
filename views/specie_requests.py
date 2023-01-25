@@ -5,8 +5,22 @@ from models import Specie
 
 
 
-def get_all_specie():
-    return Specie
+def get_all_species():
+    with sqlite3.connect("./snake.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+        db_cursor.execute("""
+        SELECT
+            a.id,
+            a.name
+        FROM Species a
+        """)
+        species = []
+        dataset = db_cursor.fetchall()
+        for row in dataset:
+            specie = Specie(row['id'], row['name'])
+            species.append(specie.__dict__)
+    return species
 
 def get_single_specie(id):
     requested_specie = None

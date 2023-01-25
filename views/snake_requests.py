@@ -5,14 +5,9 @@ from models import Snake
 
 
 def get_all_snakes():
-    # Open a connection to the database
     with sqlite3.connect("./snake.sqlite3") as conn:
-
-        # Just use these. It's a Black Box.
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
-
-        # Write the SQL query to get the information you want
         db_cursor.execute("""
         SELECT
             a.id,
@@ -21,26 +16,14 @@ def get_all_snakes():
             a.species_id,
             a.gender,
             a.color
-        FROM snake a
+        FROM Snakes a
         """)
-
-        # Initialize an empty list to hold all animal representations
         snakes = []
-
-        # Convert rows of data into a Python list
         dataset = db_cursor.fetchall()
-
-        # Iterate list of data returned from database
         for row in dataset:
-
-            # Create an animal instance from the current row.
-            # Note that the database fields are specified in
-            # exact order of the parameters defined in the
-            # Animal class above.
-            snake = Snake(row['id'], row['snake'])
-
+            snake = Snake(row['id'], row['name'], row['owner_id'],
+                    row['species_id'], row['gender'], row['color'])
             snakes.append(snake.__dict__)
-
     return snakes
 
 
