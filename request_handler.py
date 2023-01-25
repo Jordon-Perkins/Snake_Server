@@ -1,7 +1,9 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from views import ()
+from views import (get_all_snakes, get_single_snake, create_snake, update_snake,
+                    get_all_species, get_single_specie, create_specie, update_specie,
+                    get_all_owners, get_single_owner, create_owner, update_owner)
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -31,13 +33,13 @@ class HandleRequests(BaseHTTPRequestHandler):
         response = {}
         (resource, id) = self.parse_url(self.path)
         logging.debug(f"Inside the `do_GET`: {resource}, {id}")
-        if resource == "metals":
+        if resource == "species":
             if id is not None:
-                response = get_single_metal(id)
+                response = get_single_specie(id)
                 if response is None:
                     status_code = 404
-                    response = {"message": f"{id} is currently not in stock for jewelry."}
-            else: response = get_all_metals()
+                    response = {"message": f"{id} is currently in hibernation."}
+            else: response = get_all_species()
         self._set_headers(status_code)
         self.wfile.write(json.dumps(response).encode())
 
