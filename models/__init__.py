@@ -1,4 +1,3 @@
-from .metal import Metal
-from .style import Style
-from .order import Order
-from .size import Size
+from .owner import Owner
+from .snake import Snake
+from .specie import Specie
