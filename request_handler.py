@@ -40,6 +40,13 @@ class HandleRequests(BaseHTTPRequestHandler):
                     status_code = 404
                     response = {"message": f"{id} is currently in hibernation."}
             else: response = get_all_species()
+        elif resource == "owners":
+            if id is not None:
+                response = get_single_owner(id)
+                if response is None:
+                    status_code = 404
+                    response = {"message": f"{id} is currently not available for questions."}
+            else: response = get_all_owners()
         self._set_headers(status_code)
         self.wfile.write(json.dumps(response).encode())
 
