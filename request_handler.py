@@ -15,16 +15,14 @@ class HandleRequests(BaseHTTPRequestHandler):
     """
 
 
-    def parse_url(self, path):
+    def parse_url(self, path):git
         """Parse the url into the resource and id"""
         parsed_url = urlparse(path)
-        path_params = parsed_url.path.split('/')  # ['', 'animals', 1]
+        path_params = parsed_url.path.split('/') 
         resource = path_params[1]
-
         if parsed_url.query:
             query = parse_qs(parsed_url.query)
             return (resource, query)
-
         pk = None
         try:
             pk = int(path_params[2])
