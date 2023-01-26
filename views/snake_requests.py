@@ -1,7 +1,7 @@
 import sqlite3
 import json
 
-from models import Snake
+from models import Snake, Specie
 
 
 def get_all_snakes():
@@ -82,3 +82,33 @@ def update_snake(id, new_snake):
         return False
     else:
         return True
+
+
+def get_snakes_by_species_id(species_id):
+
+    with sqlite3.connect("./snake.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Write the SQL query to get the information you want
+        db_cursor.execute("""
+        SELECT
+            a.id,
+            a.name, 
+            a.owner_id,
+            a.species_id,
+            a.gender,
+            a.color
+        FROM Snakes a
+        WHERE a.species_id = ?
+        """, ( species_id, ))
+
+        snakes = []
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            snake = Snake(row['id'], row['name'], row['owner_id'], row['species_id'],
+                            row['gender'], row['color'])
+            snakes.append(snake.__dict__)
+
+    return snakes
