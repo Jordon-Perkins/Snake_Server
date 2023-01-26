@@ -38,7 +38,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                 response = get_single_specie(id)
                 if response is None:
                     status_code = 404
-                    response = {"message": f"{id} is currently in hibernation."}
+                    response = {"message": "you need to be mor specific."}
             else: response = get_all_species()
         elif resource == "owners":
             if id is not None:
@@ -47,6 +47,13 @@ class HandleRequests(BaseHTTPRequestHandler):
                     status_code = 404
                     response = {"message": f"{id} is currently not available for questions."}
             else: response = get_all_owners()
+        elif resource == "snakes":
+            if id is not None:
+                response = get_single_snake(id)
+                if response is None:
+                    status_code = 404
+                    response = {"message": f"{id} is currently hibernating."}
+            else: response = get_all_snakes()
         self._set_headers(status_code)
         self.wfile.write(json.dumps(response).encode())
 
