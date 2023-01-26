@@ -1,9 +1,10 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-
+from urllib.parse import urlparse, parse_qs
 from views import (get_all_snakes, get_single_snake, create_snake, update_snake,
                     get_all_species, get_single_specie, create_specie, update_specie,
-                    get_all_owners, get_single_owner, create_owner, update_owner)
+                    get_all_owners, get_single_owner, create_owner, update_owner,
+                    get_snakes_by_species_id)
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -15,45 +16,52 @@ class HandleRequests(BaseHTTPRequestHandler):
 
 
     def parse_url(self, path):
-        path_params = path.split("/")
+        """Parse the url into the resource and id"""
+        parsed_url = urlparse(path)
+        path_params = parsed_url.path.split('/')  # ['', 'animals', 1]
         resource = path_params[1]
-        id = None
+
+        if parsed_url.query:
+            query = parse_qs(parsed_url.query)
+            return (resource, query)
+
+        pk = None
         try:
-            id = int(path_params[2])
-        except IndexError:
-            pass 
-        except ValueError:
-            pass  
-        return (resource, id)  
+            pk = int(path_params[2])
+        except (IndexError, ValueError):
+            pass
+        return (resource, pk)
 
 
     def do_GET(self):
         """Handles GET requests to the server """
         status_code = 200
         response = {}
-        (resource, id) = self.parse_url(self.path)
-        logging.debug(f"Inside the `do_GET`: {resource}, {id}")
-        if resource == "species":
-            if id is not None:
-                response = get_single_specie(id)
-                if response is None:
-                    status_code = 404
-                    response = {"message": "you need to be mor specific."}
-            else: response = get_all_species()
-        elif resource == "owners":
-            if id is not None:
-                response = get_single_owner(id)
-                if response is None:
-                    status_code = 404
-                    response = {"message": f"{id} is currently not available for questions."}
-            else: response = get_all_owners()
-        elif resource == "snakes":
-            if id is not None:
-                response = get_single_snake(id)
-                if response is None:
-                    status_code = 404
-                    response = {"message": f"{id} is currently hibernating."}
-            else: response = get_all_snakes()
+        parsed = self.parse_url(self.path)
+        if '?' not in self.path:
+            ( resource, id ) = parsed
+            if resource == "species":
+                if id is not None:
+                    response = get_single_specie(id)
+                    if response is None:
+                        status_code = 404
+                else: response = get_all_species()
+            elif resource == "owners":
+                if id is not None:
+                    response = get_single_owner(id)
+                    if response is None:
+                        status_code = 404
+                else: response = get_all_owners()
+            elif resource == "snakes":
+                if id is not None:
+                    response = get_single_snake(id)
+                    if response is None:
+                        status_code = 404
+                else: response = get_all_snakes()
+        else:
+            (resource, query) = parsed
+            if query.get('species') and resource == 'snakes':
+                response = get_snakes_by_species_id(query['species'][0])
         self._set_headers(status_code)
         self.wfile.write(json.dumps(response).encode())
 
