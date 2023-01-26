@@ -1,7 +1,7 @@
 import sqlite3
 import json
 
-from models import Snake, Specie
+from models import Snake
 
 
 def get_all_snakes():
@@ -56,12 +56,31 @@ def get_single_snake(id):
         return snake.__dict__
 
 
-def create_snake(snake):
-    max_id = Snake[-1]["id"]
-    new_id = max_id + 1
-    snake["id"] = new_id
-    Snake.append(snake)
-    return snake
+def create_snake(new_snake):
+    with sqlite3.connect("./snake.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        INSERT INTO Snakes
+            ( name, owner_id, species_id, gender, color )
+        VALUES
+            ( ?, ?, ?, ?, ?);
+        """, (new_snake['name'], new_snake['owner_id'],
+              new_snake['species_id'], new_snake['gender'],
+              new_snake['color'], ))
+
+        # The `lastrowid` property on the cursor will return
+        # the primary key of the last thing that got added to
+        # the database.
+        id = db_cursor.lastrowid
+
+        # Add the `id` property to the animal dictionary that
+        # was sent by the client so that the client sees the
+        # primary key in the response.
+        new_snake['id'] = id
+
+
+    return new_snake
 
 
 def update_snake(id, new_snake):

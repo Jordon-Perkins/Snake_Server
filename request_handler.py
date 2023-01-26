@@ -18,13 +18,11 @@ class HandleRequests(BaseHTTPRequestHandler):
     def parse_url(self, path):
         """Parse the url into the resource and id"""
         parsed_url = urlparse(path)
-        path_params = parsed_url.path.split('/')  # ['', 'animals', 1]
+        path_params = parsed_url.path.split('/') 
         resource = path_params[1]
-
         if parsed_url.query:
             query = parse_qs(parsed_url.query)
             return (resource, query)
-
         pk = None
         try:
             pk = int(path_params[2])
@@ -73,33 +71,10 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = json.loads(post_body)
         (resource, id) = self.parse_url(self.path)
         logging.debug(f"Inside the `do_POST`: {resource}, {id}")
-        if resource == "metals":
-            new_metal = None
-            new_metal = create_metal(post_body)
-            response = new_metal
-        elif resource == "orders":
-            metal_does_exist = "metal_id" in post_body.keys()
-            style_does_exist = "style_id" in post_body.keys()
-            size_does_exist = "size_id" in post_body.keys()
-            if not metal_does_exist:
-                response = {"message": "metal_id is required"}
-                status_code = 400
-            elif not style_does_exist:
-                response = {"message": "style_id is required"}
-                status_code = 400
-            elif not size_does_exist:
-                response ={"message": "size_id is required"}
-                status_code = 400
-            else:
-                response = create_order(post_body)
-        elif resource == "styles":
-            new_style= None
-            new_style = create_style(post_body)
-            response = new_style
-        elif resource == "sizes":
-            new_size= None
-            new_size = create_size(post_body)
-            response = new_size
+        if resource == "snakes":
+            new_snake = None
+            new_snake = create_snake(post_body)
+            response = new_snake
         self._set_headers(status_code)
         self.wfile.write(json.dumps(response).encode())
 
