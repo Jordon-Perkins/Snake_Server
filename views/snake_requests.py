@@ -131,3 +131,13 @@ def get_snakes_by_species_id(species_id):
             snakes.append(snake.__dict__)
 
     return snakes
+
+
+def delete_snake(id):
+    with sqlite3.connect("./snake.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        DELETE FROM Snakes
+        WHERE id = ?
+        """, (id, ))

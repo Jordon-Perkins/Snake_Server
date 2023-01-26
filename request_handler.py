@@ -2,8 +2,8 @@ import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 from views import (get_all_snakes, get_single_snake, create_snake, update_snake,
-                    get_all_species, get_single_specie, create_specie, update_specie,
-                    get_all_owners, get_single_owner, create_owner, update_owner,
+                    get_all_species, get_single_specie,
+                    get_all_owners, get_single_owner, delete_snake,
                     get_snakes_by_species_id)
 
 import logging
@@ -60,12 +60,15 @@ class HandleRequests(BaseHTTPRequestHandler):
             (resource, query) = parsed
             if query.get('species') and resource == 'snakes':
                 response = get_snakes_by_species_id(query['species'][0])
+        # else:
+        #     status_code = 404
         self._set_headers(status_code)
         self.wfile.write(json.dumps(response).encode())
 
 
     def do_POST(self):
         status_code = 201
+        response = {}
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
@@ -105,11 +108,8 @@ class HandleRequests(BaseHTTPRequestHandler):
         (resource, id) = self.parse_url(self.path)
         logging.debug(f"Inside the `do_PUT`: {resource}, {id}")
         response = {}
-        if resource == "orders":
-            if id:
-                response = { "message" : "Your order has been placed and is in production, no changes can be made at this time, Thank you!" }
-        elif resource == "metals":
-            response = update_metal(id, post_body)
+        if resource == "snakes":
+            response = update_snake(id, post_body)
         if response:
             self._set_headers(204)
         else:
@@ -140,12 +140,17 @@ class HandleRequests(BaseHTTPRequestHandler):
 
 
     def do_DELETE(self):
-        self._set_headers(204)
+        response = {}
+        status_code = 204
         (resource, id) = self.parse_url(self.path)
         logging.debug(f"Inside the `do_DELETE`: {resource}, {id}")
-        if resource == "orders":
-            delete_order(id)
-        self.wfile.write("".encode())
+        if resource == "snakes":
+            delete_snake(id)
+        else:
+            response = {"message" : "this table doesn't exist"}
+            status_code = 404
+        self._set_headers(status_code)
+        self.wfile.write(json.dumps(response).encode())
 
 
 def main():
