@@ -28,11 +28,32 @@ def get_all_snakes():
 
 
 def get_single_snake(id):
-    requested_snake = None
-    for snake in Snake:
-        if snake["id"] == id:
-            requested_snake = snake
-    return requested_snake
+    with sqlite3.connect("./snake.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Use a ? parameter to inject a variable's value
+        # into the SQL statement.
+        db_cursor.execute("""
+        SELECT
+            a.id,
+            a.name, 
+            a.owner_id,
+            a.species_id,
+            a.gender,
+            a.color
+        FROM Snakes a
+        WHERE a.id = ?
+        """, ( id, ))
+
+        # Load the single result into memory
+        data = db_cursor.fetchone()
+
+        # Create an animal instance from the current row
+        snake = Snake(data['id'], data['name'], data['owner_id'],
+                    data['species_id'], data['gender'], data['color'])
+
+        return snake.__dict__
 
 
 def create_snake(snake):
