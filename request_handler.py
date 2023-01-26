@@ -72,9 +72,28 @@ class HandleRequests(BaseHTTPRequestHandler):
         (resource, id) = self.parse_url(self.path)
         logging.debug(f"Inside the `do_POST`: {resource}, {id}")
         if resource == "snakes":
-            new_snake = None
-            new_snake = create_snake(post_body)
-            response = new_snake
+            name_does_exist = "name" in post_body.keys()
+            owner_id_does_exist = "owner_id" in post_body.keys()
+            species_id_does_exist = "species_id" in post_body.keys()
+            gender_does_exist = "gender" in post_body.keys()
+            color_does_exist = "color" in post_body.keys()
+            if not name_does_exist:
+                response = {"message": "name is required"}
+                status_code = 400
+            elif not owner_id_does_exist:
+                response = {"message": "owner_id is required"}
+                status_code = 400
+            elif not species_id_does_exist:
+                response = {"message": "species_id is required"}
+                status_code = 400
+            elif not gender_does_exist:
+                response = {"message": "gender is required"}
+                status_code = 400
+            elif not color_does_exist:
+                response = {"message": "color is required"}
+                status_code = 400
+            else:
+                response = create_snake(post_body)
         self._set_headers(status_code)
         self.wfile.write(json.dumps(response).encode())
 
