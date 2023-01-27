@@ -49,15 +49,6 @@ def get_single_owner(id):
 
         return owner.__dict__
 
-
-def create_owner(owner):
-    max_id = Owner[-1]["id"]
-    new_id = max_id + 1
-    owner["id"] = new_id
-    Owner.append(owner)
-    return owner
-
-
 def update_owner(id, new_owner):
     with sqlite3.connect("./snake.sqlite3") as conn:
         db_cursor = conn.cursor()

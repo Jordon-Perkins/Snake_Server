@@ -45,15 +45,6 @@ def get_single_specie(id):
 
         return specie.__dict__
 
-
-def create_specie(specie):
-    max_id = Specie[-1]["id"]
-    new_id = max_id + 1
-    specie["id"] = new_id
-    Specie.append(specie)
-    return specie
-
-
 def update_specie(id, new_specie):
     with sqlite3.connect("./snake.sqlite3") as conn:
         db_cursor = conn.cursor()

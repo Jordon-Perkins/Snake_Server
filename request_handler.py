@@ -15,7 +15,7 @@ class HandleRequests(BaseHTTPRequestHandler):
     def parse_url(self, path):
         """Parse the url into the resource and id"""
         parsed_url = urlparse(path)
-        path_params = parsed_url.path.split('/') 
+        path_params = parsed_url.path.split('/')
         resource = path_params[1]
         if parsed_url.query:
             query = parse_qs(parsed_url.query)
@@ -26,6 +26,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         except (IndexError, ValueError):
             pass
         return (resource, pk)
+
 
     def do_GET(self):
         """Handles GET requests to the server """
