@@ -12,9 +12,6 @@ class HandleRequests(BaseHTTPRequestHandler):
     """Controls the functionality of any GET, PUT, POST, DELETE requests to the server
     """
 
-
-
-
     def parse_url(self, path):
         """Parse the url into the resource and id"""
         parsed_url = urlparse(path)
@@ -30,41 +27,47 @@ class HandleRequests(BaseHTTPRequestHandler):
             pass
         return (resource, pk)
 
-
     def do_GET(self):
         """Handles GET requests to the server """
         status_code = 200
         response = {}
         parsed = self.parse_url(self.path)
+
+        # determines if a resource is allowed
         ( resource, _ ) = parsed
-        if resource is not ["snakes", "species", "owners"]:
+        if resource not in ["snakes", "species", "owners"]:
             status_code = 404
-            if '?' not in self.path:
-                ( resource, id ) = parsed
-                if resource == "species":
-                    if id is not None:
-                        response = get_single_specie(id)
-                        if response is None:
-                            status_code = 404
-                    else: response = get_all_species()
-                elif resource == "owners":
-                    if id is not None:
-                        response = get_single_owner(id)
-                        if response is None:
-                            status_code = 404
-                    else: response = get_all_owners()
-                elif resource == "snakes":
-                    if id is not None:
-                        response = get_single_snake(id)
-                        if response is None:
-                            status_code = 404
-                    else: response = get_all_snakes()
-            else:
-                (resource, query) = parsed
-                if query.get('species') and resource == 'snakes':
-                    response = get_snakes_by_species_id(query['species'][0])
             self._set_headers(status_code)
             self.wfile.write(json.dumps(response).encode())
+            return
+
+        if '?' not in self.path:
+            ( resource, id ) = parsed
+            if resource == "species":
+                if id is not None:
+                    response = get_single_specie(id)
+                    if response is None:
+                        status_code = 404
+                else: response = get_all_species()
+            elif resource == "owners":
+                if id is not None:
+                    response = get_single_owner(id)
+                    if response is None:
+                        status_code = 404
+                else: response = get_all_owners()
+            elif resource == "snakes":
+                if id is not None:
+                    response = get_single_snake(id)
+                    if response is None:
+                        status_code = 404
+                else: response = get_all_snakes()
+        else:
+            (resource, query) = parsed
+            if query.get('species') and resource == 'snakes':
+                response = get_snakes_by_species_id(query['species'][0])
+
+        self._set_headers(status_code)
+        self.wfile.write(json.dumps(response).encode())
 
 
     def do_POST(self):
