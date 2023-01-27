@@ -6,13 +6,13 @@ from views import (get_all_snakes, get_single_snake, create_snake, update_snake,
                     get_all_owners, get_single_owner, delete_snake,
                     get_snakes_by_species_id)
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
 
 
 class HandleRequests(BaseHTTPRequestHandler):
     """Controls the functionality of any GET, PUT, POST, DELETE requests to the server
     """
+
+
 
 
     def parse_url(self, path):
@@ -36,34 +36,35 @@ class HandleRequests(BaseHTTPRequestHandler):
         status_code = 200
         response = {}
         parsed = self.parse_url(self.path)
-        if '?' not in self.path:
-            ( resource, id ) = parsed
-            if resource == "species":
-                if id is not None:
-                    response = get_single_specie(id)
-                    if response is None:
-                        status_code = 404
-                else: response = get_all_species()
-            elif resource == "owners":
-                if id is not None:
-                    response = get_single_owner(id)
-                    if response is None:
-                        status_code = 404
-                else: response = get_all_owners()
-            elif resource == "snakes":
-                if id is not None:
-                    response = get_single_snake(id)
-                    if response is None:
-                        status_code = 404
-                else: response = get_all_snakes()
-        else:
-            (resource, query) = parsed
-            if query.get('species') and resource == 'snakes':
-                response = get_snakes_by_species_id(query['species'][0])
-        # else:
-        #     status_code = 404
-        self._set_headers(status_code)
-        self.wfile.write(json.dumps(response).encode())
+        ( resource, _ ) = parsed
+        if resource is not ["snakes", "species", "owners"]:
+            status_code = 404
+            if '?' not in self.path:
+                ( resource, id ) = parsed
+                if resource == "species":
+                    if id is not None:
+                        response = get_single_specie(id)
+                        if response is None:
+                            status_code = 404
+                    else: response = get_all_species()
+                elif resource == "owners":
+                    if id is not None:
+                        response = get_single_owner(id)
+                        if response is None:
+                            status_code = 404
+                    else: response = get_all_owners()
+                elif resource == "snakes":
+                    if id is not None:
+                        response = get_single_snake(id)
+                        if response is None:
+                            status_code = 404
+                    else: response = get_all_snakes()
+            else:
+                (resource, query) = parsed
+                if query.get('species') and resource == 'snakes':
+                    response = get_snakes_by_species_id(query['species'][0])
+            self._set_headers(status_code)
+            self.wfile.write(json.dumps(response).encode())
 
 
     def do_POST(self):
@@ -73,7 +74,6 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
         (resource, id) = self.parse_url(self.path)
-        logging.debug(f"Inside the `do_POST`: {resource}, {id}")
         if resource == "snakes":
             name_does_exist = "name" in post_body.keys()
             owner_id_does_exist = "owner_id" in post_body.keys()
@@ -97,6 +97,8 @@ class HandleRequests(BaseHTTPRequestHandler):
                 status_code = 400
             else:
                 response = create_snake(post_body)
+        else:
+            status_code = 404
         self._set_headers(status_code)
         self.wfile.write(json.dumps(response).encode())
 
@@ -106,7 +108,6 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
         (resource, id) = self.parse_url(self.path)
-        logging.debug(f"Inside the `do_PUT`: {resource}, {id}")
         response = {}
         if resource == "snakes":
             response = update_snake(id, post_body)
@@ -143,7 +144,6 @@ class HandleRequests(BaseHTTPRequestHandler):
         response = {}
         status_code = 204
         (resource, id) = self.parse_url(self.path)
-        logging.debug(f"Inside the `do_DELETE`: {resource}, {id}")
         if resource == "snakes":
             delete_snake(id)
         else:
