@@ -49,6 +49,10 @@ def get_single_snake(id):
         # Load the single result into memory
         data = db_cursor.fetchone()
 
+        # didn't find the snake!!!
+        if data is None:
+            return None
+
         # Create an animal instance from the current row
         snake = Snake(data['id'], data['name'], data['owner_id'],
                     data['species_id'], data['gender'], data['color'])
