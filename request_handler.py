@@ -48,19 +48,26 @@ class HandleRequests(BaseHTTPRequestHandler):
                     response = get_single_specie(id)
                     if response is None:
                         status_code = 404
-                else: response = get_all_species()
+                else:
+                    response = get_all_species()
             elif resource == "owners":
                 if id is not None:
                     response = get_single_owner(id)
                     if response is None:
                         status_code = 404
-                else: response = get_all_owners()
+                else:
+                    response = get_all_owners()
             elif resource == "snakes":
                 if id is not None:
                     response = get_single_snake(id)
-                    if response is None:
+                    if response["species_id"] == 2:
+                        response = {"message": "sorry they are off partying"}
+                        status_code = 405
+
+                    elif response is None:
                         status_code = 404
-                else: response = get_all_snakes()
+                else: 
+                    response = get_all_snakes()
         else:
             (resource, query) = parsed
             if query.get('species') and resource == 'snakes':
